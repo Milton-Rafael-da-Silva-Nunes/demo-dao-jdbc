@@ -2,6 +2,8 @@ package application;
 
 import java.util.Date;
 
+import model.dao.FabricaDao;
+import model.dao.FuncionarioDao;
 import model.entities.Departamento;
 import model.entities.Funcionario;
 
@@ -16,6 +18,8 @@ public class Program {
 		
 		Funcionario fun = new Funcionario(11, "Rafael", "rafa.nunc17@gamil.com", new Date(), 1480.0, dep);
 		System.out.println(fun);
+		
+		FuncionarioDao funcionariodao = FabricaDao.criarFuncionarioDao();
 		
 
 	}
