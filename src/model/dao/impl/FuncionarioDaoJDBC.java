@@ -4,7 +4,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import db.DB;
 import db.DbException;
@@ -63,7 +66,7 @@ public class FuncionarioDaoJDBC implements FuncionarioDao {
 	}
 
 	private Funcionario instaciacaoFuncionario(ResultSet rs, Departamento dep) throws SQLException {
-		Funcionario obj =  new Funcionario();
+		Funcionario obj = new Funcionario();
 		obj.setId(rs.getInt("id"));
 		obj.setNome(rs.getString("name"));
 		obj.setEmail(rs.getString("email"));
@@ -85,4 +88,44 @@ public class FuncionarioDaoJDBC implements FuncionarioDao {
 		return null;
 	}
 
+	@Override
+	public List<Funcionario> findByDepartamento(Departamento departamento) {
+		PreparedStatement st = null;
+		ResultSet rs = null;
+
+		try {
+			st = conn.prepareStatement(
+					"SELECT seller.*, department.Name as DepName " 
+					+ "FROM seller INNER JOIN department "
+					+ "ON seller.DepartmentId = department.Id " 
+					+ "WHERE DepartmentId = ? " 
+					+ "ORDER BY Name");
+
+			st.setInt(1, departamento.getId());
+			rs = st.executeQuery();
+
+			List<Funcionario> lista = new ArrayList<>();
+			Map<Integer, Departamento> map = new HashMap<>();
+
+			while (rs.next()) { 
+				
+				Departamento dep = map.get(rs.getInt("DepartmentId")); 
+				
+				if (dep == null) {
+					dep = instaciacaoDepartamento(rs);
+					map.put(rs.getInt("DepartmentId"), dep);
+				}
+
+				Funcionario obj = instaciacaoFuncionario(rs, dep);
+				lista.add(obj);
+			}
+			return lista;
+
+		} catch (SQLException e) {
+			throw new DbException("Error ao buscar funcionario por departamento: " + e.getMessage());
+		} finally {
+			DB.closeStatement(st);
+			DB.closeResultSet(rs);
+		}
+	}
 }
