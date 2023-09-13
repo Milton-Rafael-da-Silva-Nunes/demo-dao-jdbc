@@ -26,6 +26,14 @@ public class Program {
 		for(Funcionario obj : list) {
 			System.out.println(obj);
 		}
+		
+		System.out.println();
+		
+		System.out.println("=== TESTE 3: Funcionario findAll ===");
+		list = funcionariodao.findAll();
+		for(Funcionario obj : list) {
+			System.out.println(obj);
+		}
 	}
 
 }
