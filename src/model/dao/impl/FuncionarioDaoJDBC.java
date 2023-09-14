@@ -86,7 +86,39 @@ public class FuncionarioDaoJDBC implements FuncionarioDao {
 
 	@Override
 	public void deleteById(Integer id) {
+		PreparedStatement st = null;
+		
+		try {
+			st = conn.prepareStatement("DELETE FROM seller WHERE id = ?");
+			st.setInt(1, id);
+			
+			if (idExiste(id)) {
+				st.executeUpdate();
+			} else {
+				throw new DbException("Erro! id " + id + " nao existe no banco de dados!");
+			}
+			
+		} catch (SQLException e) {
+			throw new DbException(e.getMessage());
+		} finally {
+			DB.closeStatement(st);
+		}
+	}
 
+	private boolean idExiste(Integer id) throws SQLException {
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		
+		try {
+			st = conn.prepareStatement("SELECT 1 FROM seller WHERE id = ?");
+			st.setInt(1, id);
+			rs = st.executeQuery();
+			
+			return rs.next();
+		} finally {
+			DB.closeStatement(st);
+			DB.closeResultSet(rs);
+		}
 	}
 
 	@Override
