@@ -27,20 +27,21 @@ public class FuncionarioDaoJDBC implements FuncionarioDao {
 	@Override
 	public void insert(Funcionario obj) {
 		PreparedStatement st = null;
-		
+
 		try {
-			st = conn.prepareStatement("INSERT INTO seller(Name, Email, BirthDate, BaseSalary, DepartmentId) "
-					+ "VALUES (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
-			
+			st = conn.prepareStatement(
+					"INSERT INTO seller(Name, Email, BirthDate, BaseSalary, DepartmentId) " + "VALUES (?, ?, ?, ?, ?)",
+					Statement.RETURN_GENERATED_KEYS);
+
 			st.setString(1, obj.getNome());
 			st.setString(2, obj.getEmail());
 			st.setDate(3, new java.sql.Date(obj.getAniversario().getTime()));
 			st.setDouble(4, obj.getSalarioBase());
 			st.setInt(5, obj.getDepartamento().getId());
-			
+
 			int linhasAfetadas = st.executeUpdate();
-			
-			if(linhasAfetadas > 0) {
+
+			if (linhasAfetadas > 0) {
 				ResultSet rs = st.getGeneratedKeys();
 				if (rs.next()) {
 					int id = rs.getInt(1); // Pega a primeira coluna da tabela que e a "ID"
@@ -50,17 +51,37 @@ public class FuncionarioDaoJDBC implements FuncionarioDao {
 			} else {
 				throw new DbException("Erro inesperado! Nenhuma linha afetada!");
 			}
-			
+
 		} catch (SQLException e) {
 			throw new DbException(e.getMessage());
 		} finally {
-			
+
 		}
 	}
 
 	@Override
 	public void update(Funcionario obj) {
+		PreparedStatement st = null;
 
+		try {
+			st = conn.prepareStatement("UPDATE seller "
+					+ "SET Name = ?, Email = ?, BirthDate = ?, BaseSalary = ?, DepartmentId = ? " 
+					+ "WHERE Id = ?");
+			
+			st.setString(1, obj.getNome());
+			st.setString(2, obj.getEmail());
+			st.setDate(3, new java.sql.Date(obj.getAniversario().getTime()));
+			st.setDouble(4, obj.getSalarioBase());
+			st.setInt(5, obj.getDepartamento().getId());
+			st.setInt(6, obj.getId());
+			
+			st.executeUpdate();
+			
+		} catch (SQLException e) {
+			throw new DbException(e.getMessage());
+		} finally {
+			DB.closeStatement(st);
+		}
 	}
 
 	@Override
@@ -120,20 +141,18 @@ public class FuncionarioDaoJDBC implements FuncionarioDao {
 
 		try {
 			st = conn.prepareStatement(
-					"SELECT seller.*, department.Name as DepName " 
-					+ "FROM seller INNER JOIN department "
-					+ "ON seller.DepartmentId = department.Id " 
-					+ "ORDER BY Name");
+					"SELECT seller.*, department.Name as DepName " + "FROM seller INNER JOIN department "
+							+ "ON seller.DepartmentId = department.Id " + "ORDER BY Name");
 
 			rs = st.executeQuery();
 
 			List<Funcionario> lista = new ArrayList<>();
 			Map<Integer, Departamento> map = new HashMap<>();
 
-			while (rs.next()) { 
-				
-				Departamento dep = map.get(rs.getInt("DepartmentId")); 
-				
+			while (rs.next()) {
+
+				Departamento dep = map.get(rs.getInt("DepartmentId"));
+
 				if (dep == null) {
 					dep = instaciacaoDepartamento(rs);
 					map.put(rs.getInt("DepartmentId"), dep);
@@ -159,11 +178,8 @@ public class FuncionarioDaoJDBC implements FuncionarioDao {
 
 		try {
 			st = conn.prepareStatement(
-					"SELECT seller.*, department.Name as DepName " 
-					+ "FROM seller INNER JOIN department "
-					+ "ON seller.DepartmentId = department.Id " 
-					+ "WHERE DepartmentId = ? " 
-					+ "ORDER BY Name");
+					"SELECT seller.*, department.Name as DepName " + "FROM seller INNER JOIN department "
+							+ "ON seller.DepartmentId = department.Id " + "WHERE DepartmentId = ? " + "ORDER BY Name");
 
 			st.setInt(1, departamento.getId());
 			rs = st.executeQuery();
@@ -171,10 +187,10 @@ public class FuncionarioDaoJDBC implements FuncionarioDao {
 			List<Funcionario> lista = new ArrayList<>();
 			Map<Integer, Departamento> map = new HashMap<>();
 
-			while (rs.next()) { 
-				
-				Departamento dep = map.get(rs.getInt("DepartmentId")); 
-				
+			while (rs.next()) {
+
+				Departamento dep = map.get(rs.getInt("DepartmentId"));
+
 				if (dep == null) {
 					dep = instaciacaoDepartamento(rs);
 					map.put(rs.getInt("DepartmentId"), dep);

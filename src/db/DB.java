@@ -46,10 +46,10 @@ public class DB {
 		}
 	}
 
-	public static void closeStatement(Statement stm) {
-		if (stm != null) {
+	public static void closeStatement(Statement st) {
+		if (st != null) {
 			try {
-				stm.close();
+				st.close();
 			} catch (SQLException e) {
 				throw new DbException(e.getMessage());
 			}
